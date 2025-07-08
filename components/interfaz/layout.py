@@ -12,7 +12,7 @@ def mostrar_encabezado():
     """Mostrar el encabezado principal de la aplicación"""
     st.markdown("""
     <div style='text-align: center; margin-bottom: 30px;'>
-        <h1 style='margin-bottom: 0; color: #FF6B6B;'>🎮 Simulador Optimización GPU</h1>
+        <h1 style='margin-bottom: 0; color: #B368FF;'>🎮 Simulador Optimización GPU</h1>
         <p style='font-size: 20px; color: #666;'>Análisis mediante Ley de Amdahl - Grupo Par</p>
     </div>
     """, unsafe_allow_html=True)
