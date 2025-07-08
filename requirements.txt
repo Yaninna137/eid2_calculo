@@ -1,0 +1,16 @@
+# Interfaz web interactiva
+streamlit>=1.28.0
+
+# Visualización y gráficos
+matplotlib>=3.7.0
+numpy>=1.24.0
+
+# Manejo de datos
+pandas>=2.0.0
+
+# Análisis científico
+scipy>=1.11.0
+
+
+# Opcional: Para gráficos más avanzados
+plotly>=5.15.0
