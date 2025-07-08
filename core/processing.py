@@ -13,6 +13,8 @@ class GPU:
 
     def amdahl_max(self) -> float:
         """Calcula el límite teórico de aceleración cuando k -> ∞."""
+        if self.f >= 1.0:
+            return float('inf')  # o algún valor muy grande para indicar límite infinito
         return 1 / (1 - self.f)
 
     def tiempo_optimizado(self, tiempo_original: float) -> float:
