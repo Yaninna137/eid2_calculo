@@ -22,16 +22,26 @@ def mostrar_tab_individual():
         st.metric("Fracción mejorable (f)", f"{f_fijo:.2f}")
         st.metric("Factor de mejora (k)", f"{k_fijo}")
 
-    # Slider para experimentar con diferentes k
+    # Sliders para modificar fracción mejorable f y factor k en columnas lado a lado
     st.markdown("---")
-    st.subheader("🎛️ Experimentación con Factor k")
-    k_usuario = st.slider(
-        "Modificar factor de mejora (k) para análisis", 
-        min_value=1, max_value=20, value=k_fijo, step=1
-    )
+    st.subheader("🎛️ Experimentación con Fracción Mejorable (f) y Factor k")
 
-    # Calcular resultados
-    gpu = GPU(f=f_fijo, k=k_usuario)
+    col_f, col_k = st.columns(2)
+
+    with col_f:
+        f_usuario = st.slider(
+            "Modificar fracción mejorable (f)",
+            min_value=0.0, max_value=1.0, value=f_fijo, step=0.01
+        )
+
+    with col_k:
+        k_usuario = st.slider(
+            "Modificar factor de mejora (k)",
+            min_value=1, max_value=20, value=k_fijo, step=1
+        )
+
+    # Crear instancia GPU con valores modificados
+    gpu = GPU(f=f_usuario, k=k_usuario)
     A = gpu.amdahl()
     Amax = gpu.amdahl_max()
 
@@ -45,7 +55,7 @@ def mostrar_tab_individual():
         st.metric("⚡ Límite teórico A_max", f"{Amax:.4f}")
     
     with col5:
-        eficiencia = (A / Amax) * 100
+        eficiencia = (A / Amax) * 100 if Amax != 0 else 0
         st.metric("📊 Eficiencia", f"{eficiencia:.1f}%")
 
     # Análisis de tiempo
@@ -69,13 +79,13 @@ def mostrar_tab_individual():
 
     # Gráfico individual
     st.markdown("---")
-    st.subheader(f"📈 Gráfico A vs k para {seleccion_gpu}")
+    st.subheader(f"📈 Gráfico A vs k para {seleccion_gpu} con f = {f_usuario:.2f}")
     
     fig, ax = plt.subplots(figsize=(10, 6))
     k_range = range(1, 21)
-    A_values = [GPU(f=f_fijo, k=k).amdahl() for k in k_range]
+    A_values = [GPU(f=f_usuario, k=k).amdahl() for k in k_range]
     
-    ax.plot(list(k_range), A_values, 'b-', linewidth=2, label=f'f = {f_fijo}')
+    ax.plot(list(k_range), A_values, 'b-', linewidth=2, label=f'f = {f_usuario:.2f}')
     ax.axhline(y=Amax, color='r', linestyle='--', alpha=0.7, label=f'Límite teórico = {Amax:.3f}')
     ax.axvline(x=k_usuario, color='orange', linestyle='--', alpha=0.7, label=f'k seleccionado = {k_usuario}')
     ax.scatter([k_usuario], [A], color='red', s=100, zorder=5)
