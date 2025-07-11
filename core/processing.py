@@ -19,8 +19,7 @@ class GPU:
 
     def tiempo_optimizado(self, tiempo_original: float) -> float:
         """Calcula el tiempo optimizado dado el tiempo original."""
-        A = self.amdahl()
-        return tiempo_original / A
+        return tiempo_original * ((1 - self.f) + self.f / self.k)
 
     def porcentaje_mejora(self, tiempo_original: float) -> float:
         """Calcula el porcentaje de mejora total."""
