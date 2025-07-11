@@ -2,6 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from core.processing import GPU
 from .layout import get_datos_componentes
+import plotly.graph_objects as go
 
 def mostrar_tab_individual():
     """Mostrar el tab de análisis individual de componentes"""
@@ -78,22 +79,67 @@ def mostrar_tab_individual():
         st.success(f"📈 Mejora total: {mejora_pct:.2f}%")
 
     # Gráfico individual
-    st.markdown("---")
-    st.subheader(f"📈 Gráfico A vs k para {seleccion_gpu} con f = {f_usuario:.2f}")
-    
-    fig, ax = plt.subplots(figsize=(10, 6))
-    k_range = range(1, 21)
+    k_range = list(range(1, 21))
     A_values = [GPU(f=f_usuario, k=k).amdahl() for k in k_range]
-    
-    ax.plot(list(k_range), A_values, 'b-', linewidth=2, label=f'f = {f_usuario:.2f}')
-    ax.axhline(y=Amax, color='r', linestyle='--', alpha=0.7, label=f'Límite teórico = {Amax:.3f}')
-    ax.axvline(x=k_usuario, color='orange', linestyle='--', alpha=0.7, label=f'k seleccionado = {k_usuario}')
-    ax.scatter([k_usuario], [A], color='red', s=100, zorder=5)
-    
-    ax.set_xlabel('Factor de mejora k')
-    ax.set_ylabel('Aceleración A')
-    ax.set_title(f'Aceleración vs Factor de mejora - {seleccion_gpu}')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    st.pyplot(fig)
+
+    # Crear figura Plotly
+    fig = go.Figure()
+
+    # Línea A vs k
+    fig.add_trace(go.Scatter(
+        x=k_range,
+        y=A_values,
+        mode='lines+markers',
+        name=f'f = {f_usuario:.2f}',
+        line=dict(color='#4DD0E1', width=3),
+        marker=dict(size=6),
+        hovertemplate='k=%{x}<br>A=%{y:.3f}<extra></extra>'
+    ))
+
+    # Línea límite Amax
+    fig.add_trace(go.Scatter(
+        x=[min(k_range), max(k_range)],
+        y=[Amax]*2,
+        mode='lines',
+        name=f'Límite teórico = {Amax:.3f}',
+        line=dict(color='red', width=2, dash='dash')
+    ))
+
+    # Línea vertical k seleccionado
+    fig.add_trace(go.Scatter(
+        x=[k_usuario, k_usuario],
+        y=[0, max(A_values)],
+        mode='lines',
+        name=f'k seleccionado = {k_usuario}',
+        line=dict(color='orange', width=2, dash='dot')
+    ))
+
+    # Punto seleccionado
+    fig.add_trace(go.Scatter(
+        x=[k_usuario],
+        y=[A],
+        mode='markers+text',
+        marker=dict(color='red', size=10),
+        text=[f"A = {A:.3f}"],
+        textposition="top center",
+        showlegend=False
+    ))
+
+    # Diseño general
+    fig.update_layout(
+        title=dict(text=f"Aceleración vs Factor de mejora - {seleccion_gpu}", x=0.5, xanchor='center'),
+        xaxis=dict(title='Factor de mejora k', gridcolor="#333333", color="#FFFFFF"),
+        yaxis=dict(title='Aceleración A', gridcolor="#333333", color="#FFFFFF",dtick=0.2),
+        plot_bgcolor="#00132a",
+        paper_bgcolor="#01011c",
+        font=dict(color="#FFFFFF"),
+        legend=dict(
+            bgcolor="#1C012D",
+            bordercolor="#444",
+            borderwidth=1
+        ),
+        margin=dict(t=40, b=40, l=40, r=20)
+    )
+
+    # Mostrar gráfico
+    st.plotly_chart(fig, use_container_width=True)

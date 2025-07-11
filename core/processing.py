@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
-
+import plotly.graph_objects as go 
 @dataclass
 class GPU:
     f: float  # Fracción mejorable (porcentaje en decimal, ej. 0.35)
@@ -65,64 +65,93 @@ def encontrar_mejor_componente(aceleracion_objetivo: float = 1.30):
         return None
 
 def graficar_A_vs_k(f_values, k_range=range(1, 16)):
-    """
-    Genera una figura matplotlib con la gráfica A vs k para cada f en f_values.
-    """
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    for f in f_values:
+    #     """
+    #     Genera una figura matplotlib con la gráfica A vs k para cada f en f_values.
+    #     """
+    fig = go.Figure()
+    colores = ["#4DD0E1", "#FFB74D", "#BA68C8", "#9575CD", "#81C784"]
+
+    for i, f in enumerate(f_values):
         A_values = [GPU(f=f, k=k).amdahl() for k in k_range]
-        ax.plot(list(k_range), A_values, label=f'f = {f}', linewidth=2, marker='o')
-    
-    ax.set_xlabel('Factor de mejora k', fontsize=12)
-    ax.set_ylabel('Aceleración A', fontsize=12)
-    ax.set_title('Aceleración A vs Factor de mejora k para distintos valores de f', fontsize=14)
-    ax.legend(fontsize=11)
-    ax.grid(True, alpha=0.3)
-    ax.set_xlim(1, 15)
-    
-    return fig
+        fig.add_trace(go.Scatter(
+            x=list(k_range),
+            y=A_values,
+            mode='lines+markers',
+            name=f'f = {f}',
+            line=dict(color=colores[i % len(colores)], width=3),
+            marker=dict(size=6),
+            hovertemplate="k = %{x}<br>A = %{y:.3f}<extra></extra>"
+        ))
+
+    fig.update_layout(
+        title=dict(text="Aceleración A vs Factor de mejora k para distintos valores de f", x=0.5, xanchor='center'),
+        xaxis=dict(title="k (Nº de procesadores)", gridcolor="#2A2A2A", color="#FFFFFF"),
+        yaxis=dict(title="A (Aceleración)", gridcolor="#2A2A2A", color="#FFFFFF"),
+        plot_bgcolor="#00132a", #"#00000f",
+        paper_bgcolor="#01011c",
+        font=dict(color="#FFFFFF"),
+        legend=dict(bgcolor='#1C012D', bordercolor="#444444", borderwidth=1)
+    )
+    return fig  
 
 def graficar_comparacion_componentes():
-    """Genera gráfica comparativa de todos los componentes."""
+    import plotly.graph_objects as go
+
     componentes = calcular_todos_componentes()
-    
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
-    
-    # Gráfico 1: Aceleración A
     nombres = list(componentes.keys())
-    aceleraciones = [componentes[nombre]["A"] for nombre in nombres]
-    
-    bars1 = ax1.bar(range(len(nombres)), aceleraciones, color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'])
-    ax1.set_xlabel('Componentes')
-    ax1.set_ylabel('Aceleración A')
-    ax1.set_title('Aceleración por Componente')
-    ax1.set_xticks(range(len(nombres)))
-    ax1.set_xticklabels([nombre.split()[0] for nombre in nombres], rotation=45)
-    ax1.grid(True, alpha=0.3)
-    
-    # Añadir valores sobre las barras
-    for bar, valor in zip(bars1, aceleraciones):
-        ax1.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.01,
-                f'{valor:.3f}', ha='center', va='bottom')
-    
-    # Gráfico 2: Límite teórico Amax
-    amax_values = [componentes[nombre]["Amax"] for nombre in nombres]
-    
-    bars2 = ax2.bar(range(len(nombres)), amax_values, color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'])
-    ax2.set_xlabel('Componentes')
-    ax2.set_ylabel('Aceleración Máxima Amax')
-    ax2.set_title('Límite Teórico por Componente')
-    ax2.set_xticks(range(len(nombres)))
-    ax2.set_xticklabels([nombre.split()[0] for nombre in nombres], rotation=45)
-    ax2.grid(True, alpha=0.3)
-    
-    # Añadir valores sobre las barras
-    for bar, valor in zip(bars2, amax_values):
-        ax2.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 0.05,
-                f'{valor:.2f}', ha='center', va='bottom')
-    
-    plt.tight_layout()
+    A_vals = [componentes[n]["A"] for n in nombres]
+    Amax_vals = [componentes[n]["Amax"] for n in nombres]
+
+    colores_A = ['#00B8D9', '#FFB74D', '#BA68C8', '#81C784']
+    colores_Amax = ['#00B8D9', '#FFB74D', '#BA68C8', '#81C784']
+
+    # Gráfico de barras agrupadas
+    fig = go.Figure(data=[
+        go.Bar(
+            name='Aceleración A',
+            x=nombres,
+            y=A_vals,
+            marker_color=colores_A,
+            text=[f"{a:.3f}" for a in A_vals],
+            textposition='outside'
+        ),
+        go.Bar(
+            name='Aceleración Máxima Amax',
+            x=nombres,
+            y=Amax_vals,
+            marker_color=colores_Amax,
+            opacity=0.5,
+            text=[f"{a:.2f}" for a in Amax_vals],
+            textposition='outside'
+        )
+    ])
+
+    # Diseño del gráfico
+    fig.update_layout(
+        barmode='group',
+        title=dict(text="Comparación de Aceleración por Componente", x=0.5,xanchor='center'),
+        plot_bgcolor='#00132a',
+        paper_bgcolor='#01011c',
+        font=dict(color="#FFFFFF"),
+        xaxis=dict(
+            title='Componentes',
+            tickangle=-15,
+            gridcolor="#333333",
+            color="#FFFFFF"
+        ),
+        yaxis=dict(
+            title='Aceleración',
+            gridcolor="#333333",
+            color="#FFFFFF"
+        ),
+        legend=dict(
+            bgcolor='#1C012D',
+            bordercolor="#444444",
+            borderwidth=1
+        ),
+        margin=dict(t=60, b=60, l=40, r=20)
+    )
+
     return fig
 
 def analizar_impacto_nvlink():

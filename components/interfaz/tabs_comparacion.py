@@ -19,7 +19,9 @@ def mostrar_tab_comparacion():
     # Gráfico comparativo
     st.subheader("📊 Gráficos Comparativos")
     fig_comp = graficar_comparacion_componentes()
-    st.pyplot(fig_comp)
+    # st.pyplot(fig_comp)
+    st.plotly_chart(fig_comp, use_container_width=True)
+
     
     # Análisis del mejor componente
     st.markdown("---")

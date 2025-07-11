@@ -21,32 +21,56 @@ def mostrar_sidebar():
     """Mostrar el sidebar con información teórica"""
     with st.sidebar:
         st.header("📚 Información Teórica")
+        st.markdown("#### ⨺ Ley de Amdahl")
+
+        st.latex(r"A = \frac{1}{(1 - f) + \frac{f}{k}}")
+
+        st.markdown("#### ⨺ Límite Teórico de Aceleración")
+
+        st.latex(r"A_{\text{max}} = \frac{1}{1 - f}")
         st.markdown("""
-        **Ley de Amdahl:**
-        
-        A = 1 / ((1-f) + f/k)
-        
-        Donde:
-        - **f**: Fracción mejorable
-        - **k**: Factor de mejora
-        - **A**: Aceleración obtenida
-        
-        **Límite teórico:**
-        
-        A_max = 1 / (1-f)
-        """)
+        <div style='
+            background-color: #150120;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 16px;
+            line-height: 1.6;
+        '>
+            <b>Donde:</b><br>
+            • <b>f</b>: Fracción mejorable<br>
+            • <b>k</b>: Factor de mejora<br>
+            • <b>A</b>: Aceleración obtenida
+        </div>
+        """, unsafe_allow_html=True)
+
         
         st.markdown("---")
-        st.header("🔧 Componentes GPU")
+        st.markdown("### 🔹 Componentes GPU")
+
+        bloque_html = """
+        <div style='
+            background-color: #150120;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-size: 16px;
+            color: rgba(255,255,255,0.92);
+        '>
+            <b>{nombre}</b>: <span style='color: #CCCCCC;'>{info}</span>
+        </div>
+        """
+
         componentes_info = {
-            "Núcleos CUDA": "f=0.35, k=5",
-            "Memoria VRAM": "f=0.20, k=3", 
-            "Unidades texturizado": "f=0.25, k=7",
-            "Interconexión NVLink": "f=0.20, k=10"
+            "Núcleos CUDA": "f = 0.35, k = 5",
+            "Memoria VRAM": "f = 0.20, k = 3", 
+            "Unidades de Texturizado": "f = 0.25, k = 7",
+            "Interconexión NVLink": "f = 0.20, k = 10"
         }
-        
-        for comp, info in componentes_info.items():
-            st.write(f"**{comp}**: {info}")
+
+        for nombre, info in componentes_info.items():
+            st.markdown(bloque_html.format(nombre=nombre, info=info), unsafe_allow_html=True)
+
 
 def get_datos_componentes():
     """Retorna los datos fijos de los componentes GPU"""
